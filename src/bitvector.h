@@ -4,6 +4,7 @@
 typedef struct bitvector {
     unsigned char* bits;
     int size;
+    int bits_size;
     unsigned int capacity;
 } bitvector;
 

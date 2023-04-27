@@ -6,6 +6,7 @@
 bitvector* bitvector_create(int size) {
     bitvector* bv = malloc(sizeof(bitvector));
     bv->size = size;
+    bv->bits_size = -1;
     bv->capacity = size + 1;
     bv->bits = malloc(sizeof(char) * bv->capacity);
     return bv;
@@ -47,6 +48,7 @@ bitvector *bitvector_copy(const bitvector* vector) {
 
 bitvector* bitvector_compress(const bitvector* vector) {
     bitvector* bv = malloc(sizeof(bitvector));
+    bv->bits_size = vector->size;
     bv->size = vector->size / 8 + 1;
     bv->capacity = bv->size + 1;
     bv->bits = malloc(sizeof(char) * bv->capacity);
@@ -66,6 +68,7 @@ bitvector* bitvector_compress(const bitvector* vector) {
 bitvector* bitvector_decompress(const bitvector* vector) {
     bitvector* bv = malloc(sizeof(bitvector));
     bv->size = vector->size * 8;
+    bv->bits_size = -1;
     bv->capacity = bv->size + 1;
     bv->bits = malloc(sizeof(char) * bv->capacity);
     // Initialize all bits to 0
