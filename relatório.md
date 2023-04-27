@@ -15,3 +15,10 @@ Jedson Gabriel Ferreira de Paula
 |   char   |    2mb.txt  |   2120  |  416 | 0,127   |   0,182    |
 |   char   |    20mb.txt  |   21172  |  4080 | 1,380   |   1,706    |
 |   char   |    100mb.txt  |   105848  |  20368 | 6,903   |   8,874    |
+
+## Metodologia
+
+Foram executados uma bateria de 10 execuções para cada arquivo, e os valores apresentados são a média dos resultados obtidos.
+
+Para conseguir o tempo de execução, foi utilizado o programa time do linux, que retorna o tempo de execução de um programa e retirado o tempo real.
+
