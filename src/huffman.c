@@ -179,8 +179,8 @@ void huffman_encode_file_per_char(char *input_file, char *output_file) {
   if (tree == NULL) {
     return;
   }
-  printf("Huffman tree:\n");
-  huffman_print_tree(tree->root, 0);
+  // printf("Huffman tree:\n");
+  // huffman_print_tree(tree->root, 0);
 
   // Create a character code table from the huffman tree
   bitvector *char_code_table[256];
@@ -244,13 +244,13 @@ void huffman_encode_file_per_char(char *input_file, char *output_file) {
   // char_code_table));
 
   // Print the code table
-  printf("Code table:\n");
-  for (int i = 0; i < 256; i++) {
-    if (char_code_table[i] != NULL && char_code_table[i]->size > 0) {
-      printf("%c: ", i);
-      bitvector_print(char_code_table[i]);
-    }
-  }
+  // printf("Code table:\n");
+  // for (int i = 0; i < 256; i++) {
+  //   if (char_code_table[i] != NULL && char_code_table[i]->size > 0) {
+  //     printf("%c: ", i);
+  //     bitvector_print(char_code_table[i]);
+  //   }
+  // }
 
   // Print the tree
   // printf("Tree:\n");
@@ -277,13 +277,13 @@ void huffman_write_char_tree(huffman_tree *tree, FILE *output) {
 void huffman_write_char_tree_helper(huffman_node *node, FILE *output) {
   // If the node is a leaf, write a 1 and the character to the output file
   if (node->left == NULL && node->right == NULL) {
-    printf("1%c", node->c);
+    // printf("1%c", node->c);
     fwrite("1", sizeof(char), 1, output);
     fwrite(&node->c, sizeof(char), 1, output);
     return;
   }
 
-  printf("0");
+  // printf("0");
   // If the node is not a leaf, write a 0 to the output file
   fwrite("0", sizeof(char), 1, output);
 
@@ -723,16 +723,16 @@ void huffman_encode_file_per_word(char *input_file, char *output_file) {
   }
 
   // print the word frequency table
-  printf("Word frequency table:\n");
-  for (int i = 0; i < word_count; i++) {
-    printf("%s: %d\n", words[i], word_freq_table[i]);
-  }
+  // printf("Word frequency table:\n");
+  // for (int i = 0; i < word_count; i++) {
+  //   printf("%s: %d\n", words[i], word_freq_table[i]);
+  // }
 
   // Create a huffman tree from the word frequency table
   huffman_tree *tree = huffman_create_tree_from_word_freq_table(
       words, word_count, word_freq_table);
   // print the tree
-  huffman_print_tree(tree->root, 0);
+  // huffman_print_tree(tree->root, 0);
 
   // create encoding table
   bitvector **code_table = malloc(word_count * sizeof(bitvector *));
@@ -743,16 +743,16 @@ void huffman_encode_file_per_word(char *input_file, char *output_file) {
   // encode the words
   huffman_create_word_code_table(tree->root, code_table, bitvector_create(0),
                                  words, word_count);
-  printf("Encoding table:\n");
-  for (int i = 0; i < word_count; i++) {
-    printf("%s: ", words[i]);
-    if (code_table[i] == NULL) {
-      // print the word
-      printf("NULL TABLE ENTRY: %s\n", words[i]);
-    } else {
-      bitvector_print(code_table[i]);
-    }
-  }
+  // printf("Encoding table:\n");
+  // for (int i = 0; i < word_count; i++) {
+  //   printf("%s: ", words[i]);
+  //   if (code_table[i] == NULL) {
+  //     // print the word
+  //     printf("NULL TABLE ENTRY: %s\n", words[i]);
+  //   } else {
+  //     bitvector_print(code_table[i]);
+  //   }
+  // }
 
   // Open the output file for writing
   FILE *output = fopen(output_file, "wb");
@@ -833,13 +833,13 @@ void huffman_write_word_tree_helper(huffman_node *node, FILE *output) {
   }
   // If the node is a leaf, write a 1 and the character to the output file
   if (node->left == NULL && node->right == NULL) {
-    printf("1%s ", node->word);
+    // printf("1%s ", node->word);
     fwrite("1", sizeof(char), 1, output);
     fwrite(node->word, sizeof(char), strlen(node->word) + 1, output);
     return;
   }
 
-  printf("0");
+  // printf("0");
   // If the node is not a leaf, write a 0 to the output file
   fwrite("0", sizeof(char), 1, output);
 
@@ -858,18 +858,18 @@ void huffman_decode_word_file_helper(bitvector *input_bits, huffman_tree *tree,
   for (int i = 0; i < input_bits->size; i++) {
     // If the bit is 0, go left
     if (bitvector_get(input_bits, i) == 0) {
-      printf("0");
+      // printf("0");
       node = node->left;
     }
     // If the bit is 1, go right
     else if (bitvector_get(input_bits, i) == 1) {
-      printf("1");
+      // printf("1");
       node = node->right;
     }
 
     // If the node is a leaf, print the character and reset the node to the root
     if (node->left == NULL && node->right == NULL) {
-      printf(" ");
+      // printf(" ");
       fprintf(output, "%s", node->word);
       node = tree->root;
     }
@@ -887,7 +887,7 @@ void huffman_decode_file_per_word(char *input_file, char *output_file) {
   huffman_tree *tree = huffman_create_word_tree_from_file(input);
 
   // print the tree
-  huffman_print_tree(tree->root, 0);
+  // huffman_print_tree(tree->root, 0);
 
   // Open the output file for writing
   FILE *output = fopen(output_file, "w");
