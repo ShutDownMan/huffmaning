@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
             huffman_decode_file_per_char(input_file, output_file);
         } else if (type == 1) {
             // Decompress per word
-            // huffman_decode_file_per_word(input_file, output_file);
+            huffman_decode_file_per_word(input_file, output_file);
         }
     } else if (option == 1) {
         if (type == 0) {
