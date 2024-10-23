@@ -4,6 +4,16 @@
 
 #include "huffman.h"
 
+#define INVALID_ARGUMENTS -1
+#define INVALID_OPTION -2
+#define INVALID_TYPE -3
+
+#define OPTION_COMPRESS 1
+#define OPTION_DECOMPRESS 0
+#define TYPE_CHAR 0
+#define TYPE_WORD 1
+#define TYPE_TOKEN 2
+
 /*
     usage: ./huffmaning [-D or --decompress | -C or --compress] [-t or --type] <input file> <output file>
     -D or --decompress: decompress the input file
@@ -29,16 +39,16 @@ int main(int argc, char *argv[]) {
     // Parse command line arguments
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-D") == 0 || strcmp(argv[i], "--decompress") == 0) {
-            option = 0;
+            option = OPTION_DECOMPRESS;
         } else if (strcmp(argv[i], "-C") == 0 || strcmp(argv[i], "--compress") == 0) {
-            option = 1;
+            option = OPTION_COMPRESS;
         } else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--type") == 0) {
             i++;
             if (i < argc) {
                 type = atoi(argv[i]);
             } else {
                 printf("Error: missing argument for -t or --type option\n");
-                return 0;
+                return -1;
             }
         } else if (i == argc - 2) {
             input_file = argv[i];
@@ -52,22 +62,48 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    if (option == 0) {
-        if (type == 0) {
-            // Decompress per character
-            huffman_decode_file_per_char(input_file, output_file);
-        } else if (type == 1) {
-            // Decompress per word
-            huffman_decode_file_per_word(input_file, output_file);
-        }
-    } else if (option == 1) {
-        if (type == 0) {
-            // Compress per character
-            huffman_encode_file_per_char(input_file, output_file);
-        } else if (type == 1) {
-            // Compress per word
-            huffman_encode_file_per_word(input_file, output_file);
-        }
+    switch (option) {
+        case OPTION_DECOMPRESS:
+            switch (type) {
+                case TYPE_CHAR:
+                    // Decompress per character
+                    huffman_decode_file_per_char(input_file, output_file);
+                    break;
+                case TYPE_WORD:
+                    // Decompress per word
+                    huffman_decode_file_per_word(input_file, output_file);
+                    break;
+                case TYPE_TOKEN:
+                    // Decompress per token
+                    // huffman_decode_file_per_token(input_file, output_file);
+                    break;
+                default:
+                    printf("Error: invalid type\n");
+                    return INVALID_TYPE;
+            }
+            break;
+        case OPTION_COMPRESS:
+            switch (type) {
+                case TYPE_CHAR:
+                    // Compress per character
+                    huffman_encode_file_per_char(input_file, output_file);
+                    break;
+                case TYPE_WORD:
+                    // Compress per word
+                    huffman_encode_file_per_word(input_file, output_file);
+                    break;
+                case TYPE_TOKEN:
+                    // Compress per token
+                    // huffman_encode_file_per_token(input_file, output_file);
+                    break;
+                default:
+                    printf("Error: invalid type\n");
+                    return INVALID_TYPE;
+            }
+            break;
+        default:
+            printf("Error: invalid option\n");
+            return INVALID_OPTION;
     }
 
     return 0;
