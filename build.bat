@@ -1,0 +1,1 @@
+gcc -o2 src/main.c src/priority_queue.c src/bitvector.c src/huffman.c src/trie.c -o huffman

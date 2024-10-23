@@ -63,4 +63,6 @@ int priority_queue_size(const priority_queue* queue);
  */
 bool priority_queue_is_empty(const priority_queue* queue);
 
+void priority_queue_print(priority_queue* queue, void (*print)(void* data));
+
 #endif // PRIORITY_QUEUE_H

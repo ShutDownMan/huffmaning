@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -183,4 +184,17 @@ bool priority_queue_is_empty(const priority_queue* queue) {
 
     // return if the size is 0
     return queue->size == 0;
+}
+
+void priority_queue_print(priority_queue* queue, void (*print)(void* data)) {
+    // if queue does not exist
+    if (queue == NULL) {
+        return;
+    }
+
+    // loop through the queue
+    for (int i = 0; i < queue->size; i++) {
+        // print the data at the index
+        print(queue->heap[i]);
+    }
 }

@@ -34,6 +34,21 @@ void bitvector_append(bitvector* vector, char value) {
     vector->size++;
 }
 
+bitvector *bitvector_from_byte(unsigned char byte) {
+    bitvector* bv = bitvector_create(8);
+    for (int i = 0; i < 8; i++) {
+        bitvector_append(bv, (byte >> i) & 1);
+    }
+    return bv;
+}
+
+void bitvector_concat(bitvector* vector, const bitvector* other) {
+    // TODO: Improve this horrible implementation
+    for (int i = 0; i < other->size; i++) {
+        bitvector_append(vector, other->bits[i]);
+    }
+}
+
 bitvector *bitvector_copy(const bitvector* vector) {
     bitvector* bv = malloc(sizeof(bitvector));
     bv->size = vector->size;
@@ -86,13 +101,20 @@ bitvector* bitvector_decompress(const bitvector* vector) {
     return bv;
 }
 
+void bitvector_reset(bitvector* vector) {
+    for (int i = 0; i < vector->size; i++) {
+        vector->bits[i] = 0;
+    }
+    vector->size = 0;
+}
+
 int bitvector_size(const bitvector* vector) {
     return vector->size;
 }
 
 void bitvector_print(bitvector* bv) {
     for (int i = 0; i < bv->size; i++) {
-        printf("%d", bv->bits[i]);
+        printf("%x ", bv->bits[i]);
     }
     printf("\n");
 }

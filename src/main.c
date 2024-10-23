@@ -8,8 +8,8 @@
 #define INVALID_OPTION -2
 #define INVALID_TYPE -3
 
-#define OPTION_COMPRESS 1
 #define OPTION_DECOMPRESS 0
+#define OPTION_COMPRESS 1
 #define TYPE_CHAR 0
 #define TYPE_WORD 1
 #define TYPE_TOKEN 2
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
             i++;
             if (i < argc) {
                 type = atoi(argv[i]);
-            } else {
+            } else if (option == OPTION_DECOMPRESS){
                 printf("Error: missing argument for -t or --type option\n");
                 return -1;
             }
@@ -57,30 +57,14 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (option == -1 || type == -1 || input_file == NULL || output_file == NULL) {
+    if (option == -1 || input_file == NULL || output_file == NULL) {
         printf("Error: missing required options or arguments\n");
         return 0;
     }
 
     switch (option) {
         case OPTION_DECOMPRESS:
-            switch (type) {
-                case TYPE_CHAR:
-                    // Decompress per character
-                    huffman_decode_file_per_char(input_file, output_file);
-                    break;
-                case TYPE_WORD:
-                    // Decompress per word
-                    huffman_decode_file_per_word(input_file, output_file);
-                    break;
-                case TYPE_TOKEN:
-                    // Decompress per token
-                    // huffman_decode_file_per_token(input_file, output_file);
-                    break;
-                default:
-                    printf("Error: invalid type\n");
-                    return INVALID_TYPE;
-            }
+            huffman_decode_file(input_file, output_file);
             break;
         case OPTION_COMPRESS:
             switch (type) {
