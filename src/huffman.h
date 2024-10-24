@@ -64,6 +64,8 @@ int *_huffman_get_char_freq_table_from_file(char *input_file);
  */
 void huffman_encode_file_per_word(char *input_file, char *output_file);
 
+trie *_huffman_get_word_freq_table_from_file(char *input_file);
+
 /**
  * Function to decompress a file using huffman decoding
  * @param input_file The input file
@@ -152,8 +154,7 @@ long _huffman_write_huffman_table_helper(huffman_node *node, FILE *output);
  * @param word_freq_table The word frequency table
  * @return The huffman tree
  */
-huffman_tree *huffman_create_tree_from_word_freq_table(char **words, unsigned int word_count,
-  int *word_freq_table);
+huffman_tree *huffman_create_tree_from_word_freq_table(trie *word_freqs);
 
 /**
  * Function to delete a huffman tree from memory
@@ -178,6 +179,11 @@ void huffman_print_tree(huffman_node *tree, int level);
 void huffman_write_char_tree(huffman_tree *tree, FILE *output);
 
 void huffman_write_char_tree_helper(huffman_node *node, FILE *output);
+
+trie *_huffman_word_create_code_table(huffman_tree *tree);
+
+
+void _huffman_word_traverse_tree(huffman_node *node, bitvector *code, int depth, trie *code_table);
 
 void huffman_write_word_tree(huffman_tree *tree, FILE *output);
 

@@ -97,17 +97,27 @@ void _trie_keys_helper(const trie_node* node, const char* prefix, dynamic_array 
     }
 }
 
-void* trie_search(const trie* t, const char* word, bool greedy) {
+void* trie_search(const trie* t, const char* word, int *steps, bool greedy) {
     trie_node* current = t->root;
+    void *last_data = NULL;
+    int last_data_steps = 0;
     for (int i = 0; word[i] != '\0'; i++) {
-        if (current->data != NULL && greedy) {
-            return current->data;
+        if (current->data != NULL) {
+            if (greedy) {
+                return current->data;
+            } else {
+                last_data = current->data;
+            }
         }
         if (current->children[(unsigned char)word[i]] == NULL) {
-            return NULL;
+            *steps = last_data_steps;
+            return last_data;
         }
+        *steps += 1;
+        last_data_steps += 1;
         current = current->children[(unsigned char)word[i]];
     }
+
     return current->data;
 }
 

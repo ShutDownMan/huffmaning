@@ -2,6 +2,7 @@
 #define TRIE_H
 
 #include <stdbool.h>
+#include "bitvector.h"
 #include "dynamic_array.h"
 
 typedef struct trie_node {
@@ -69,7 +70,7 @@ void _trie_keys_helper(const trie_node* node, const char* prefix, dynamic_array 
  * @param greedy If true, return the data associated with the first prefix of the word found.
  * @return The data associated with the word, or NULL if the word is not found.
  */
-void *trie_search(const trie* t, const char* word, bool greedy);
+void* trie_search(const trie* t, const char* word, int *steps, bool greedy);
 
 /**
  * Removes a word from the trie.

@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "huffman.h": "c",
+        "trie.h": "c"
+    }
+}

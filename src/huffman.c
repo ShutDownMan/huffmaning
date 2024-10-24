@@ -104,7 +104,7 @@ huffman_tree *_huffman_create_tree_from_char_freq_table(int *char_freq_table) {
     parent->left = left;
     parent->right = right;
 
-    printf("node freq: %d\n", parent->freq);
+    // printf("node freq: %d\n", parent->freq);
 
     // insert the parent node back into the priority queue
     priority_queue_insert(queue, parent);
@@ -168,7 +168,7 @@ void _huffman_char_traverse_tree(huffman_node *node, bitvector *code, int depth,
   // printf("depth: %d\n", depth);
   // printf("node: %s\n", node->data);
   // printf("code: ");
-  bitvector_print(code);
+  // bitvector_print(code);
 
   if (node->data != NULL) {
     // insert the character code into the code table
@@ -218,9 +218,22 @@ void huffman_encode_file(char *input_file, char *output_file, huffman_tree *tree
   fseek(input, 0, SEEK_SET);
   fseek(output, header->compressed_offset, SEEK_SET);
   while (fgets(line, LINE_BUFFER_SIZE, input) != NULL) {
-    for (int i = 0; i < strlen(line); i++) {
-      bitvector *code = trie_search(code_table, (char *)&line[i], true);
-      // printf("code: %s\n", (char *)&line[i]);
+    int steps = 0;
+    for (int i = 0; i < strlen(line); i += steps) {
+      bitvector *code = trie_search(code_table, (char *)(line + i), &steps, false);
+      // printf("code: %s\n", (char *)(line + i));
+      // printf("steps: %d\n", steps);
+
+      if (steps == 0) {
+        printf("could not find code for '%s'\n", (char *)(line + i));
+        steps = 1;
+      }
+
+      if (code == NULL) {
+        printf("code not found\n");
+        continue;
+      }
+
       // bitvector_print(code);
       bitvector_concat(output_buffer, code);
       word_count++;
@@ -228,12 +241,12 @@ void huffman_encode_file(char *input_file, char *output_file, huffman_tree *tree
   }
 
   header->word_count = word_count;
-  printf("word_count: %d\n", word_count);
+  // printf("word_count: %d\n", word_count);
 
   // write the output buffer to the output file
   bitvector *compressed_output_buffer = bitvector_compress(output_buffer);
-  bitvector_print(output_buffer);
-  bitvector_print(compressed_output_buffer);
+  // bitvector_print(output_buffer);
+  // bitvector_print(compressed_output_buffer);
   fwrite(compressed_output_buffer->bits, compressed_output_buffer->size , 1, output);
 
   // write the huffman header to the output file
@@ -288,7 +301,7 @@ void _huffman_write_word_list_helper(huffman_node *node, FILE *output) {
   if (node->data != NULL) {
     int current_offset = ftell(output);
     int length = strlen(node->data);
-    printf("writing %s (%d)\n", node->data, length);
+    // printf("writing %s (%d)\n", node->data, length);
     fwrite(&length, sizeof(int), 1, output);
     fwrite(node->data, length, 1, output);
     free(node->data);
@@ -311,10 +324,11 @@ void _huffman_write_code_list(trie *code_table, FILE *output) {
 
   // write the codes to the output file
   for (int i = 0; i < code_count; i++) {
-    bitvector *code = trie_search(code_table, words[i], false);
+    int steps = 0;
+    bitvector *code = trie_search(code_table, words[i], &steps, false);
     unsigned int length = bitvector_size(code);
     fwrite(&length, sizeof(unsigned int), 1, output);
-    bitvector_print(code);
+    // bitvector_print(code);
     // TODO: do the bitvector properly
     bitvector *compressed_code = bitvector_compress(code);
     // bitvector_print(compressed_code);
@@ -387,11 +401,11 @@ void huffman_decode_file(char *input_file, char *output_file) {
   fseek(input, header.word_list_offset, SEEK_SET);
   _huffman_populate_tree_with_words(tree, input);
 
-  huffman_print(tree);
+  // huffman_print(tree);
 
   // decode the input file using the huffman tree
   fseek(input, header.compressed_offset, SEEK_SET);
-  printf("compressed_offset: 0x%x\n", header.compressed_offset);
+  // printf("compressed_offset: 0x%x\n", header.compressed_offset);
   huffman_decode_file_helper(input, output, &header, tree);
 
   // close the files
@@ -492,16 +506,16 @@ void huffman_decode_file_helper(FILE *input, FILE *output, huffman_header *heade
   huffman_node *current = tree->root;
   unsigned int word_count = 0;
 
-  printf("word_count: %d\n", header->word_count);
+  // printf("word_count: %d\n", header->word_count);
   while (!feof(input)) {
     // read the next byte from the input file
     unsigned char byte;
     fread(&byte, sizeof(unsigned char), 1, input);
-    printf("byte: 0x%x\n", byte);
+    // printf("byte: 0x%x\n", byte);
 
     // traverse the huffman tree
     for (int i = 0; i < 8; i++) {
-      printf("bit: %d\n", (byte >> i) & 1);
+      // printf("bit: %d\n", (byte >> i) & 1);
 
       if ((byte >> i) & 1) {
         current = current->right;
@@ -514,7 +528,7 @@ void huffman_decode_file_helper(FILE *input, FILE *output, huffman_header *heade
         current = tree->root;
       } else if (current->data != NULL) {
         fprintf(output, "%s", current->data);
-        printf("current: %s\n", current->data);
+        // printf("current: %s\n", current->data);
         current = tree->root;
         word_count++;
       }
@@ -528,22 +542,178 @@ void huffman_decode_file_helper(FILE *input, FILE *output, huffman_header *heade
 
 void huffman_encode_file_per_word(char *input_file, char *output_file) {
   // create a word frequency table
-  char **words = _huffman_get_word_freq_table_from_file(input_file);
+  trie *word_freqs = _huffman_get_word_freq_table_from_file(input_file);
 
   // create a huffman tree from the word frequency table
-  huffman_tree *tree = huffman_create_tree_from_word_freq_table(words, 0, NULL);
+  huffman_tree *tree = huffman_create_tree_from_word_freq_table(word_freqs);
+
+  // printf("Huffman tree:\n");
+  // huffman_print(tree);
+  // printf("\n====================\n");
 
   // create code table from the huffman tree
-  trie *code_table = _huffman_char_create_code_table(tree);
-
-  // deallocate the word frequency table
-  for (int i = 0; words[i] != NULL; i++) {
-    free(words[i]);
-  }
-
-  free(words);
+  trie *code_table = _huffman_word_create_code_table(tree);
 
   // encode the input file using the word code table
   huffman_encode_file(input_file, output_file, tree, code_table);
 }
 
+trie *_huffman_get_word_freq_table_from_file(char *input_file) {
+  trie *word_freq_table = trie_create();
+
+  // open the input file for reading
+  FILE *input = fopen(input_file, "r");
+
+  // if the file does not exist, return NULL
+  if (input == NULL) {
+    return NULL;
+  }
+
+  // read the file line by line and update the word frequency table
+  char line[LINE_BUFFER_SIZE];
+  while (fgets(line, LINE_BUFFER_SIZE, input) != NULL) {
+    // char *word = strtok(line, " \t\n");
+    // while (word != NULL) {
+    //   if (strlen(word) > 0) {
+    //     int steps = 0;
+    //     int freq = trie_search(word_freq_table, word, &steps, false);
+    //     if (freq == NULL) {
+    //       trie_insert(word_freq_table, word, (void *)1);
+    //     } else {
+    //       trie_insert(word_freq_table, word, (void *)(freq + 1));
+    //     }
+    //   }
+    //   // get which delimiter and add to trie
+    //   word = strtok(NULL, " \t\n");
+    //   printf("word: %s\n", word);
+    // }
+
+    int n = 0, offset = 0;
+    char word_buffer[LINE_BUFFER_SIZE] = {0};
+    char delim[2] = {0};
+
+    // printf("line: %s\n", line);
+    for (offset = 0; line[offset] != '\0' && offset < LINE_BUFFER_SIZE; offset += n) {
+      n = 0;
+      sscanf(line + offset, "%[^ \t\n]%n", word_buffer, &n);
+      // printf("word: %s\n", word_buffer);
+
+      if (strlen(word_buffer) > 0) {
+        int steps = 0;
+        int freq = (int)trie_search(word_freq_table, word_buffer, &steps, false);
+        if (freq == 0) {
+          trie_insert(word_freq_table, word_buffer, (void *)1);
+        } else {
+          trie_insert(word_freq_table, word_buffer, (void *)(freq + 1));
+        }
+        word_buffer[0] = '\0';
+      }
+
+      sscanf(line + offset + n, "%c", delim);
+      n++;
+      // printf("delim: '%s'\n", delim);
+
+      if (strlen(delim) > 0) {
+        int steps = 0;
+        int freq = (int)trie_search(word_freq_table, delim, &steps, false);
+        if (freq == 0) {
+          trie_insert(word_freq_table, delim, (void *)1);
+        } else {
+          trie_insert(word_freq_table, delim, (void *)(freq + 1));
+        }
+        delim[0] = '\0';
+      }
+    }
+  }
+
+  // close the file
+  fclose(input);
+
+  // get the keys from the word frequency table
+  return word_freq_table;
+}
+
+huffman_tree *huffman_create_tree_from_word_freq_table(trie *word_freqs) {
+  // create a priority queue
+  priority_queue *queue = priority_queue_create(NULL, _freq_compare);
+  dynamic_array *words = trie_keys(word_freqs);
+  int steps = 0;
+
+  // insert the words into the priority queue
+  for (int i = 0; i < words->size; i++) {
+    huffman_node *node = malloc(sizeof(huffman_node));
+    node->data = words->array[i];
+    node->freq = (int)trie_search(word_freqs, node->data, &steps, false);
+    node->left = NULL;
+    node->right = NULL;
+    priority_queue_insert(queue, node);
+  }
+
+  // build the huffman tree
+  while (priority_queue_size(queue) > 1) {
+    huffman_node *left = NULL, *right = NULL, *parent = NULL;
+
+    // extract the two nodes with the lowest frequency
+    priority_queue_extract(queue, (void **)&left);
+    priority_queue_extract(queue, (void **)&right);
+
+    // create a parent node
+    parent = malloc(sizeof(huffman_node));
+    parent->data = NULL;
+    parent->freq = left->freq + right->freq;
+    parent->left = left;
+    parent->right = right;
+
+    // insert the parent node back into the priority queue
+    priority_queue_insert(queue, parent);
+  }
+
+  // extract the root node from the priority queue
+  huffman_node *root;
+  priority_queue_extract(queue, (void **)&root);
+
+  // deallocate the priority queue
+  priority_queue_destroy(queue);
+
+  // create a huffman tree
+  huffman_tree *tree = malloc(sizeof(huffman_tree));
+  tree->root = root;
+
+  return tree;
+}
+
+trie *_huffman_word_create_code_table(huffman_tree *tree) {
+  // create a trie to store the word code table
+  trie *code_table = trie_create();
+
+  // bitvector to store the word code
+  bitvector *code = bitvector_create(0);
+
+  // traverse the huffman tree to generate the word code table
+  _huffman_word_traverse_tree(tree->root, code, 0, code_table);
+
+  return code_table;
+}
+
+void _huffman_word_traverse_tree(huffman_node *node, bitvector *code, int depth, trie *code_table) {
+  if (node == NULL) {
+    bitvector_destroy(code);
+    return;
+  }
+
+  if (node->data != NULL) {
+    // insert the word code into the code table
+    bitvector *copy = bitvector_copy(code);
+    trie_insert(code_table, node->data, copy);
+  } else {
+    // traverse the left subtree
+    bitvector *copy_left = bitvector_copy(code);
+    bitvector_append(copy_left, 0);
+    _huffman_word_traverse_tree(node->left, copy_left, depth + 1, code_table);
+
+    // traverse the right subtree
+    bitvector *copy_right = bitvector_copy(code);
+    bitvector_append(copy_right, 1);
+    _huffman_word_traverse_tree(node->right, copy_right, depth + 1, code_table);
+  }
+}
