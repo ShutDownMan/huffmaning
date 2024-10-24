@@ -2,9 +2,11 @@
 #define BITVECTOR_H
 
 typedef struct bitvector {
+    // Array of bits
     unsigned char* bits;
+    // Number of bits
     int size;
-    int bits_size;
+    // Capacity of the array
     unsigned int capacity;
 } bitvector;
 
@@ -24,9 +26,9 @@ void bitvector_concat(bitvector* vector, const bitvector* other);
 
 bitvector *bitvector_copy(const bitvector* vector);
 
-bitvector* bitvector_compress(const bitvector* vector);
+// bitvector* bitvector_compress(const bitvector* vector);
 
-bitvector* bitvector_decompress(const bitvector* vector);
+// bitvector* bitvector_decompress(const bitvector* vector);
 
 void bitvector_reset(bitvector* vector);
 

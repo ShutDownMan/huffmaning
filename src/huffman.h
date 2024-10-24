@@ -85,8 +85,6 @@ void huffman_decode_file_helper(FILE *input, FILE *output, huffman_header *heade
 
 huffman_node *_huffman_read_huffman_table_helper(FILE *input);
 
-
-
 /**
  * Function to create a huffman tree from a character frequency table
  * @param char_freq_table The character frequency table
@@ -182,18 +180,6 @@ void huffman_write_char_tree_helper(huffman_node *node, FILE *output);
 
 trie *_huffman_word_create_code_table(huffman_tree *tree);
 
-
 void _huffman_word_traverse_tree(huffman_node *node, bitvector *code, int depth, trie *code_table);
-
-void huffman_write_word_tree(huffman_tree *tree, FILE *output);
-
-void huffman_write_word_tree_helper(huffman_node *node, FILE *output);
-
-huffman_tree *huffman_read_char_tree(FILE *input);
-
-huffman_node *huffman_read_char_tree_helper(FILE *input);
-
-huffman_node *huffman_create_node(char c, char *word, int freq,
-                                  huffman_node *left, huffman_node *right);
 
 #endif // HUFFMAN_H

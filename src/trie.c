@@ -67,7 +67,11 @@ void _trie_print_helper(trie_node* node, int level) {
                 printf("  ");
             }
             printf("%c ", (char)i);
-            bitvector_print(node->children[i]->data);
+            if (node->children[i]->data != NULL) {
+                printf("-> ");
+                bitvector_print(node->children[i]->data);
+            }
+            printf("\n");
             _trie_print_helper(node->children[i], level + 1);
         }
     }
